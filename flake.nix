@@ -6,7 +6,7 @@
     minimalbase.url = "github:nonrootdocker/minimalbase-ng";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, minimalbase }:
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
