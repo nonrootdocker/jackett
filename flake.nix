@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    minimalbase.url = "github:nonrootdocker/minimalbase-ng";
   };
 
   outputs = { self, nixpkgs }:
