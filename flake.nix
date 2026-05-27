@@ -86,6 +86,7 @@
 
   in {
     packages.${system} = {
+      default = self.packages.${system}.sabnzbd-image;
       sabnzbd-image = pkgs.dockerTools.buildImage {
         name = "minimalbase-ng";
         tag = "latest";
@@ -102,7 +103,6 @@
             sabAbi
           ];
         };
-        default = self.packages.${system}.sabnzbd-image;
         config = {
           Entrypoint = [ "${container-init}/bin/container-init" ];
 
