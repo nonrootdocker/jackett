@@ -55,7 +55,7 @@
     # ----------------------------
     sabAbi = pkgs.writeText "sabnzbd-abi.json" (builtins.toJSON {
       version = 2;
-
+      destination = "/app/main";
       process = {
         exec = "python";
         args = [
@@ -105,8 +105,6 @@
 
         config = {
           Entrypoint = [ "${container-init}/bin/container-init" ];
-
-          Cmd = [ sabAbi ];
 
           Env = [
             "TZ=UTC"
