@@ -2,7 +2,7 @@
   description = "minimalbase-ng + sabnzbd service";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.follows = "minimalbase/nixpkgs";
     minimalbase.url = "github:nonrootdocker/minimalbase-ng";
     sabnzbd-src = {
       url = "github:sabnzbd/sabnzbd";
