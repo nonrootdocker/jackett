@@ -54,22 +54,25 @@
     # ----------------------------
     # ABI generator (NO shell)
     # ----------------------------
-    sabAbi = pkgs.writeText "sabnzbd-abi.json" (builtins.toJSON {
-      version = 2;
-      destination = "/app/main";
-      process = {
-        exec = "python";
-        args = [
-          "--config-file"
-          "/data/sabnzbd.ini"
-          "--logging"
-          "0"
-          "--console"
-          "--browser"
-          "0"
-        ];
+    sabAbi = pkgs.writeTextFile {
+      name = "sabnzbd-abi.json";
+      text = builtins.toJSON {
+        version = 2;
+        process = {
+          exec = "python";
+          args = [
+            "--config-file"
+            "/data/sabnzbd.ini"
+            "--logging"
+            "0"
+            "--console"
+            "--browser"
+            "0"
+          ];
+        };
       };
-    });
+      destination = "/app/main"; 
+  };
 
   container-init = minimalbase.packages.${system}.container-init;
 
