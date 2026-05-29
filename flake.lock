@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1779973169,
-        "narHash": "sha256-GNIniyQXq20mL642EinEafuK6cmNWi0BvyoZd88RSZ4=",
+        "lastModified": 1780032967,
+        "narHash": "sha256-Ip+mdGp37pCNqtYTleYJb/uaLtFTGaIv04prmYnVOis=",
         "owner": "nonrootdocker",
         "repo": "minimalbase-ng",
-        "rev": "287c8a86f295db7f120f0cd264c804cdc3cc7f82",
+        "rev": "f3e715b15c1fd36493eb5d4973dd8fa18d1be4eb",
         "type": "github"
       },
       "original": {
