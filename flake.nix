@@ -16,7 +16,7 @@
     pkgs = import nixpkgs { inherit system; };
 
     # ----------------------------
-    # SABnzbd package
+    # SABnzbd Python environment
     # ----------------------------
     sabnzbdPython = pkgs.python3.withPackages (ps: [
       ps.apprise
@@ -25,42 +25,33 @@
       ps.feedparser
       ps.pyopenssl
     ]);
+
     sabnzbd = pkgs.stdenv.mkDerivation {
       pname = "sabnzbd";
       version = "latest";
-
       src = sabnzbd-src;
 
-      buildInputs = [
-        sabnzbdPython
-      ];
+      buildInputs = [ sabnzbdPython ];
 
+      # Clean, standard install phase (no custom python symlink hacks needed)
       installPhase = ''
         mkdir -p $out/app
-
-        # SABnzbd source
-        cp -r . $out/app/sabnzbd-src
-
-        # REQUIRED ENTRYPOINT
-        if [ -f SABnzbd.py ]; then
-          cp SABnzbd.py $out/app/main.py
-        else
-          echo "ERROR: SABnzbd.py not found"
-          exit 1
-        fi
+        cp -r . $out/app/sabnzbd
       '';
     };
 
     # ----------------------------
-    # ABI generator (NO shell)
+    # ABI generator (Points directly to Nix Store)
     # ----------------------------
     sabAbi = pkgs.writeTextFile {
       name = "sabnzbd-abi.json";
       text = builtins.toJSON {
         version = 2;
         process = {
-          exec = "python";
+          # Point directly to the secure, immutable Nix store Python binary:
+          exec = "${sabnzbdPython}/bin/python"; 
           args = [
+            "/app/sabnzbd/SABnzbd.py"
             "--config-file"
             "/data/sabnzbd.ini"
             "--logging"
@@ -72,9 +63,9 @@
         };
       };
       destination = "/app/main"; 
-  };
+    };
 
-  container-init = minimalbase.packages.${system}.container-init;
+    container-init = minimalbase.packages.${system}.container-init;
 
   in {
     packages.${system} = {
@@ -95,8 +86,11 @@
             sabAbi
           ];
         };
+
         config = {
           Entrypoint = [ "${container-init}/bin/container-init" ];
+
+          User = "1000:1000";
 
           Env = [
             "TZ=UTC"
