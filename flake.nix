@@ -119,6 +119,9 @@
             pkgs.coreutils
             pkgs.tzdata
             pkgs.cacert
+            pkgs.par2cmdline
+            pkgs.unrar
+            pkgs.p7zip
 
             container-init
             sabnzbd
