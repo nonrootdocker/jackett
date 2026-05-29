@@ -133,8 +133,6 @@
         };
 
         config = {
-          Entrypoint = [ "${container-init}/bin/container-init" ];
-
           User = "1000:1000";
 
           Env = [
