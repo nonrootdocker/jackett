@@ -126,7 +126,6 @@
             pkgs.unrar
             pkgs.p7zip
 
-            container-init
             sabnzbd
             sabAbi
           ];
