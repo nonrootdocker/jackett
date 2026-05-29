@@ -108,14 +108,13 @@
       destination = "/app/main"; 
     };
 
-    container-init = minimalbase.packages.${system}.container-init;
-
   in {
     packages.${system} = {
       default = self.packages.${system}.sabnzbd-image;
       sabnzbd-image = pkgs.dockerTools.buildImage {
         name = "minimalbase-ng";
         tag = "latest";
+        fromImage = minimalbase.packages.${system}.base-image;
 
         copyToRoot = pkgs.buildEnv {
           name = "root";
