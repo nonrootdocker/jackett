@@ -25,3 +25,32 @@ jobs:
 
       - name: Flake check
         run: nix flake check -L
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Load Image into Docker
+        if: github.event_name != 'pull_request'
+        run: |
+          docker load < result
+
+      - name: Tag and Push Image
+        if: github.event_name != 'pull_request'
+        run: |
+          # Convert repository owner to lowercase for registry compliance
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          
+          # Match the local name defined in your flake.nix
+          LOCAL_IMAGE="minimalbase-ng:latest"
+          TARGET_IMAGE="ghcr.io/${OWNER_LC}/sabnzbd-ng"
+          
+          docker tag "$LOCAL_IMAGE" "${TARGET_IMAGE}:latest"
+          docker tag "$LOCAL_IMAGE" "${TARGET_IMAGE}:${{ github.sha }}"
+          
+          docker push "${TARGET_IMAGE}:latest"
+          docker push "${TARGET_IMAGE}:${{ github.sha }}"        
