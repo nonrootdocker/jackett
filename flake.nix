@@ -132,6 +132,7 @@
           User = "1000:1000";
 
           Env = [
+            "PATH=/bin"
             "TZ=UTC"
             "LANG=en_US.UTF-8"
           ];
