@@ -24,6 +24,7 @@
       ps.cryptography
       ps.feedparser
       ps.pyopenssl
+      ps.sabctools
     ]);
 
     sabnzbd = pkgs.stdenv.mkDerivation {
