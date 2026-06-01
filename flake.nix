@@ -5,8 +5,7 @@
     nixpkgs.follows = "minimalbase/nixpkgs";
     minimalbase.url = "github:nonrootdocker/minimalbase-ng";
     jackett-src = {
-      # Matches the official Dockerfile's target release
-      url = "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxMuslAMDx64.tar.gz";
+      url = "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz";
       flake = false;
     };
   };
@@ -14,8 +13,6 @@
   outputs = { self, nixpkgs, minimalbase, jackett-src }:
   let
     system = "x86_64-linux";
-    
-    # Standard glibc-based packages
     pkgs = import nixpkgs {
       inherit system;
       config = {
@@ -23,33 +20,27 @@
       };
     };
 
-    # Standard musl-based package set (guaranteed to evaluate correctly)
-    muslPkgs = import nixpkgs {
-      inherit system;
-      crossSystem = {
-        config = "x86_64-unknown-linux-musl";
-      };
-    };
-
     # ----------------------------
     # Jackett package
     # ----------------------------
-    jackett = muslPkgs.stdenv.mkDerivation {
+    jackett = pkgs.stdenv.mkDerivation {
       pname = "jackett";
       version = "latest";
       src = jackett-src;
 
       nativeBuildInputs = [
-        muslPkgs.autoPatchelfHook
+        pkgs.autoPatchelfHook
       ];
 
       buildInputs = [
-        muslPkgs.icu
-        muslPkgs.curl
-        muslPkgs.sqlite
-        muslPkgs.openssl       # Musl-compiled OpenSSL 3.0
-        muslPkgs.zlib          # Musl-compiled zlib
-        muslPkgs.stdenv.cc.cc.lib
+        pkgs.icu
+        pkgs.curl
+        pkgs.sqlite
+        pkgs.openssl           # Secure OpenSSL 3.0
+        pkgs.zlib
+        pkgs.krb5              # Required for .NET 9.0 SSL initialization
+        pkgs.lttng-ust_2_12    # Required for coreclr tracepoint provider (.0)
+        pkgs.stdenv.cc.cc.lib
       ];
 
       # Clean, standard install phase (no custom python symlink hacks needed)
@@ -107,8 +98,8 @@
             "PATH=/bin"
             "TZ=UTC"
             "LANG=en_US.UTF-8"
-            # Points .NET to the musl-compiled runtime dependencies in the Nix Store
-            "LD_LIBRARY_PATH=${muslPkgs.icu}/lib:${muslPkgs.openssl}/lib:${muslPkgs.zlib}/lib"
+            # Explicitly points .NET to the secure OpenSSL 3.0, Kerberos, and dependencies in the Nix Store
+            "LD_LIBRARY_PATH=${pkgs.icu}/lib:${pkgs.openssl}/lib:${pkgs.zlib}/lib:${pkgs.krb5}/lib:${pkgs.lttng-ust_2_12}/lib"
           ];
         };
       };
