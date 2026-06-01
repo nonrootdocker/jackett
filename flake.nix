@@ -1,16 +1,16 @@
 {
-  description = "minimalbase-ng + sabnzbd service";
+  description = "minimalbase-ng + jackett service";
 
   inputs = {
     nixpkgs.follows = "minimalbase/nixpkgs";
     minimalbase.url = "github:nonrootdocker/minimalbase-ng";
-    sabnzbd-src = {
-      url = "github:sabnzbd/sabnzbd";
+    jackett-src = {
+      url = "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, minimalbase, sabnzbd-src }:
+  outputs = { self, nixpkgs, minimalbase, jackett-src }:
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs {
@@ -19,89 +19,48 @@
         allowUnfree = true;
       };
     };
-    # ----------------------------
-    # SABnzbd Python environment
-    # ----------------------------
-    sabnzbdPython = pkgs.python3.withPackages (ps: [
-      ps.apprise
-      ps.babelfish
-      ps.blinker
-      ps.certifi
-      ps.charset-normalizer
-      ps.cheetah3
-      ps.cheroot
-      ps.cherrypy
-      ps.configobj
-      ps.cryptography
-      ps.feedparser
-      ps.guessit
-      ps.idna
-      ps.jaraco-classes
-      ps.jaraco-collections
-      ps.jaraco-context
-      ps.jaraco-functools
-      ps.jaraco-text
-      ps.markdown
-      ps.more-itertools
-      ps.notify2
-      ps.oauthlib
-      ps.orjson
-      ps.paho-mqtt
-      ps.portend
-      ps.puremagic
-      ps.pycparser
-      ps.pyjwt
-      ps.pyopenssl
-      ps.pysocks
-      ps.python-dateutil
-      ps.pytz
-      ps.pyyaml
-      ps.rarfile
-      ps.rebulk
-      ps.requests
-      ps.requests-oauthlib
-      ps.sabctools
-      ps.sgmllib3k
-      ps.six
-      ps.tempora
-      ps.ujson
-      ps.urllib3
-      ps.zc-lockfile
-    ]);
 
-    sabnzbd = pkgs.stdenv.mkDerivation {
-      pname = "sabnzbd";
+    # ----------------------------
+    # Jackett package
+    # ----------------------------
+    jackett = pkgs.stdenv.mkDerivation {
+      pname = "jackett";
       version = "latest";
-      src = sabnzbd-src;
+      src = jackett-src;
 
-      buildInputs = [ sabnzbdPython ];
+      nativeBuildInputs = [
+        pkgs.autoPatchelfHook
+      ];
+
+      buildInputs = [
+        pkgs.icu
+        pkgs.curl
+        pkgs.sqlite
+        pkgs.openssl
+        pkgs.zlib
+        pkgs.stdenv.cc.cc.lib
+      ];
 
       # Clean, standard install phase (no custom python symlink hacks needed)
       installPhase = ''
-        mkdir -p $out/app
-        cp -r . $out/app/sabnzbd
+        mkdir -p $out/app/Jackett
+        cp -r . $out/app/Jackett/
       '';
     };
 
     # ----------------------------
     # ABI generator (Points directly to Nix Store)
     # ----------------------------
-    sabAbi = pkgs.writeTextFile {
-      name = "sabnzbd-abi.json";
+    jackettAbi = pkgs.writeTextFile {
+      name = "jackett-abi.json";
       text = builtins.toJSON {
         version = 2;
         process = {
-          # Point directly to the secure, immutable Nix store Python binary:
-          exec = "${sabnzbdPython}/bin/python"; 
+          # Point directly to the secure, immutable Nix store Jackett binary:
+          exec = "${jackett}/app/Jackett/jackett"; 
           args = [
-            "/app/sabnzbd/SABnzbd.py"
-            "--config-file"
-            "/data/sabnzbd.ini"
-            "--logging"
-            "0"
-            "--console"
-            "--browser"
-            "0"
+            "--DataFolder"
+            "/data"
           ];
         };
       };
@@ -110,8 +69,8 @@
 
   in {
     packages.${system} = {
-      default = self.packages.${system}.sabnzbd-image;
-      sabnzbd-image = pkgs.dockerTools.buildImage {
+      default = self.packages.${system}.jackett-image;
+      jackett-image = pkgs.dockerTools.buildImage {
         name = "minimalbase-ng";
         tag = "latest";
         fromImage = minimalbase.packages.${system}.base-image;
@@ -122,12 +81,9 @@
             pkgs.coreutils
             pkgs.tzdata
             pkgs.cacert
-            pkgs.par2cmdline
-            pkgs.unrar
-            pkgs.p7zip
 
-            sabnzbd
-            sabAbi
+            jackett
+            jackettAbi
           ];
         };
 
