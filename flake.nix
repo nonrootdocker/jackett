@@ -38,7 +38,7 @@
         pkgs.sqlite
         pkgs.openssl
         pkgs.zlib
-        pkgs.lttng-ust
+        pkgs.lttng-ust_2_12
         pkgs.stdenv.cc.cc.lib
       ];
 
