@@ -1,5 +1,18 @@
 {
   "nodes": {
+    "jackett-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1780268406,
+        "narHash": "sha256-UN2rlFMht7T60srjx8KPB3zy3Qc1HxGUsQv/fzLhIVs=",
+        "type": "tarball",
+        "url": "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz"
+      }
+    },
     "minimalbase": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -35,28 +48,12 @@
     },
     "root": {
       "inputs": {
+        "jackett-src": "jackett-src",
         "minimalbase": "minimalbase",
         "nixpkgs": [
           "minimalbase",
           "nixpkgs"
-        ],
-        "sabnzbd-src": "sabnzbd-src"
-      }
-    },
-    "sabnzbd-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1779807299,
-        "narHash": "sha256-76pnXTKIyOxQjErHPwX2VonSTPNPyKQSFBj6WklG+3s=",
-        "owner": "sabnzbd",
-        "repo": "sabnzbd",
-        "rev": "cc61dc974b383e5bce04746274407448b6d0443e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sabnzbd",
-        "repo": "sabnzbd",
-        "type": "github"
+        ]
       }
     }
   },
