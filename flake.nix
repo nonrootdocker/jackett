@@ -1,8 +1,8 @@
 {
-  description = "minimalbase-ng + jackett service";
+  description = "minimalbase + jackett service";
   inputs = {
     nixpkgs.follows = "minimalbase/nixpkgs";
-    minimalbase.url = "github:nonrootdocker/minimalbase-ng";
+    minimalbase.url = "github:nonrootdocker/minimalbase";
     jackett-src = {
       url = "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz";
       flake = false;
@@ -63,7 +63,7 @@
     packages.${system} = {
       default = self.packages.${system}.jackett-image;
       jackett-image = pkgs.dockerTools.buildImage {
-        name = "minimalbase-ng";
+        name = "minimalbase";
         tag = "latest";
         fromImage = minimalbase.packages.${system}.base-image;
         copyToRoot = pkgs.buildEnv {
