@@ -19,11 +19,26 @@
     };
     opensslLib = pkgs.openssl.out;
     # ----------------------------
+    # Jackett version (read from the release's deps.json, so it always
+    # matches the exact binary pinned by the jackett-src lock entry)
+    # ----------------------------
+    jackettDeps =
+      let
+        p1 = "${jackett-src}/jackett.deps.json";
+        p2 = "${jackett-src}/Jackett/jackett.deps.json";
+      in if builtins.pathExists p1 then p1 else p2;
+    jackettVersion =
+      let
+        deps = builtins.fromJSON (builtins.readFile jackettDeps);
+        keys = builtins.attrNames deps.libraries;
+        key = builtins.head (builtins.filter (k: builtins.match "jackett/.*" k != null) keys);
+      in pkgs.lib.removePrefix "jackett/" key;
+    # ----------------------------
     # Jackett package
     # ----------------------------
     jackett = pkgs.stdenv.mkDerivation {
       pname = "jackett";
-      version = "latest";
+      version = jackettVersion;
       src = jackett-src;
       nativeBuildInputs = [
         pkgs.autoPatchelfHook
@@ -64,7 +79,7 @@
       default = self.packages.${system}.jackett-image;
       jackett-image = pkgs.dockerTools.buildImage {
         name = "minimalbase";
-        tag = "latest";
+        tag = jackettVersion;
         fromImage = minimalbase.packages.${system}.base-image;
         copyToRoot = pkgs.buildEnv {
           name = "root";
