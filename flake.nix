@@ -19,26 +19,11 @@
     };
     opensslLib = pkgs.openssl.out;
     # ----------------------------
-    # Jackett version (read from the release's deps.json, so it always
-    # matches the exact binary pinned by the jackett-src lock entry)
-    # ----------------------------
-    jackettDeps =
-      let
-        p1 = "${jackett-src}/jackett.deps.json";
-        p2 = "${jackett-src}/Jackett/jackett.deps.json";
-      in if builtins.pathExists p1 then p1 else p2;
-    jackettVersion =
-      let
-        deps = builtins.fromJSON (builtins.readFile jackettDeps);
-        keys = builtins.attrNames deps.libraries;
-        key = builtins.head (builtins.filter (k: builtins.match "jackett/.*" k != null) keys);
-      in pkgs.lib.removePrefix "jackett/" key;
-    # ----------------------------
     # Jackett package
     # ----------------------------
     jackett = pkgs.stdenv.mkDerivation {
       pname = "jackett";
-      version = jackettVersion;
+      version = "release";
       src = jackett-src;
       nativeBuildInputs = [
         pkgs.autoPatchelfHook
@@ -57,6 +42,16 @@
         cp -r . $out/app/Jackett/
       '';
     };
+    # ----------------------------
+    # Jackett version: read from the bundled deps.json library key
+    # (jackett/<version>). Exposed as the `version` output for CI tagging.
+    # ----------------------------
+    jackettVersion = pkgs.runCommand "jackett-version" {
+      nativeBuildInputs = [ pkgs.jq ];
+    } ''
+      jq -r '.libraries | keys[]' ${jackett}/app/Jackett/jackett.deps.json \
+        | grep '^jackett/' | head -n1 | cut -d/ -f2 | tr -d '\n' > $out
+    '';
     # ----------------------------
     # ABI generator (Points directly to Nix Store)
     # ----------------------------
@@ -77,9 +72,10 @@
   in {
     packages.${system} = {
       default = self.packages.${system}.jackett-image;
+      version = jackettVersion;
       jackett-image = pkgs.dockerTools.buildImage {
-        name = "minimalbase";
-        tag = jackettVersion;
+        name = "jackett";
+        tag = "latest";
         fromImage = minimalbase.packages.${system}.base-image;
         copyToRoot = pkgs.buildEnv {
           name = "root";
