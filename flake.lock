@@ -3,8 +3,8 @@
     "jackett-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1783036136,
-        "narHash": "sha256-sfKo94COJisoZsQelZ5CH4SGxFmSUImKqNi2Vg7hJec=",
+        "lastModified": 1783218933,
+        "narHash": "sha256-j4vq3tGc2w4OYruCCpS6d5z9/mKsY5yG3qblnx153/o=",
         "type": "tarball",
         "url": "https://github.com/Jackett/Jackett/releases/latest/download/Jackett.Binaries.LinuxAMDx64.tar.gz"
       },
